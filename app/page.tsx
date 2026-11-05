@@ -4,6 +4,7 @@ import { Section } from '@/components/dashboard/section'
 import { KpiHeader } from '@/components/dashboard/kpi-header'
 import { FieldAccuracyChart } from '@/components/dashboard/field-accuracy-chart'
 import { JudgeCharts } from '@/components/dashboard/judge-charts'
+import { JudgeDiversityCards } from '@/components/dashboard/judge-diversity-cards'
 import { ModelDiversityTable } from '@/components/dashboard/model-diversity-table'
 import { CoverageCard } from '@/components/dashboard/coverage-card'
 import { JudgeDecisionsTable } from '@/components/dashboard/judge-decisions-table'
@@ -58,7 +59,10 @@ export default async function Page() {
           titulo="A juíza ajudou?"
           descricao="Para cada item em que IA 1 e IA 2 divergiram: a decisão da juíza corrigiu, manteve ou piorou o resultado?"
         >
-          <JudgeCharts execucoes={dados.execucoes} />
+          <div className="flex flex-col gap-4">
+            <JudgeDiversityCards grupos={dados.juiza_por_diversidade} />
+            <JudgeCharts execucoes={dados.execucoes} />
+          </div>
         </Section>
 
         <Section

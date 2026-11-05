@@ -91,12 +91,25 @@ export interface TempoManual {
   protocolo: string
 }
 
+export interface JuizaPorDiversidade {
+  grupo: string
+  execucoes: string[]
+  divergencias_avaliadas: number
+  corrigiu: number
+  piorou: number
+  manteve_certo: number
+  manteve_errado: number
+  acerto_pct: number
+}
+
 export interface DashboardDados {
   gerado_em: string
   fonte: string
   resumo_por_caso: ResumoCaso[]
   execucoes: Execucao[]
   decisoes_juiza: DecisaoJuiza[]
+  /** Pode faltar em respostas antigas em cache. */
+  juiza_por_diversidade?: JuizaPorDiversidade[]
   cobertura_texto_ppc_real: CoberturaTexto
   tempo_manual: TempoManual
   volume_por_ppc_real: {
@@ -107,7 +120,7 @@ export interface DashboardDados {
 }
 
 export async function getDashboardDados(): Promise<DashboardDados> {
-  const res = await fetch(DATA_URL, { next: { revalidate: 3600 } })
+  const res = await fetch(DATA_URL, { next: { revalidate: 300 } })
   if (!res.ok) {
     throw new Error(`Falha ao buscar dados (${res.status} ${res.statusText})`)
   }
