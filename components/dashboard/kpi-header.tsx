@@ -2,7 +2,7 @@ import { Clock, BookOpen, Timer, GitBranch } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { GrayBadge } from './status-badges'
 import { formatMinSec, formatPct } from '@/lib/format'
-import type { ResumoCaso, TempoManual } from '@/lib/dashboard-data'
+import type { ResumoCaso } from '@/lib/dashboard-data'
 
 function encontradas(resumo: ResumoCaso) {
   const pct = resumo.disciplinas_revocacao_media_pct
@@ -43,11 +43,12 @@ function KpiCard({
 export function KpiHeader({
   cefet,
   sintetico,
-  tempoManual,
+  tempoModeloUnico,
 }: {
   cefet: ResumoCaso
   sintetico: ResumoCaso | undefined
-  tempoManual: TempoManual
+  /** Tempo do processo anterior (um modelo só), em segundos; null se não medido. */
+  tempoModeloUnico: number | null
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -63,8 +64,9 @@ export function KpiHeader({
           label="Tempo médio por PPC"
           value={formatMinSec(cefet.tempo_medio_s)}
           aside={
-            <span className="flex items-center gap-1.5 text-sm text-muted-foreground" title={tempoManual.protocolo}>
-              manual: <GrayBadge>{tempoManual.minutos === null ? tempoManual.status : `${tempoManual.minutos} min`}</GrayBadge>
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              modelo único:{' '}
+              <GrayBadge>{tempoModeloUnico === null ? 'A MEDIR' : formatMinSec(tempoModeloUnico)}</GrayBadge>
             </span>
           }
           footnote={`min:seg · faixa ${formatMinSec(cefet.tempo_min_s)}–${formatMinSec(cefet.tempo_max_s)}`}

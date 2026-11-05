@@ -1,4 +1,4 @@
-import { getDashboardDados } from '@/lib/dashboard-data'
+import { ehDoPipeline, getDashboardDados } from '@/lib/dashboard-data'
 import { formatDateTime } from '@/lib/format'
 import { Section } from '@/components/dashboard/section'
 import { KpiHeader } from '@/components/dashboard/kpi-header'
@@ -8,11 +8,16 @@ import { JudgeDiversityCards } from '@/components/dashboard/judge-diversity-card
 import { ModelDiversityTable } from '@/components/dashboard/model-diversity-table'
 import { CoverageCard } from '@/components/dashboard/coverage-card'
 import { JudgeDecisionsTable } from '@/components/dashboard/judge-decisions-table'
+import { PreviousProcess } from '@/components/dashboard/previous-process'
 
 export default async function Page() {
   const dados = await getDashboardDados()
-  const cefet = dados.resumo_por_caso.find((c) => c.caso === 'cefet-engcomp')
-  const sintetico = dados.resumo_por_caso.find((c) => c.caso === 'sintetico')
+  // O baseline (processo anterior) e as tentativas que falharam ficam fora dos gráficos do pipeline
+  const execucoes = dados.execucoes.filter((e) => ehDoPipeline(e.caso) && !e.falhou)
+  const casos = dados.resumo_por_caso.filter((c) => ehDoPipeline(c.caso))
+  const decisoes = dados.decisoes_juiza.filter((d) => execucoes.some((e) => e.id === d.execucao))
+  const cefet = casos.find((c) => c.caso === 'cefet-engcomp')
+  const sintetico = casos.find((c) => c.caso === 'sintetico')
 
   return (
     <div className="min-h-dvh bg-zinc-50">
@@ -28,8 +33,8 @@ export default async function Page() {
             contra um gabarito sem LLM.
           </p>
           <p className="text-xs text-muted-foreground">
-            {dados.execucoes.length} execuções · {dados.resumo_por_caso.length} casos ·{' '}
-            {dados.decisoes_juiza.length} decisões da juíza · dados gerados em{' '}
+            {execucoes.length} execuções do pipeline · {casos.length} casos · {decisoes.length} decisões da juíza ·
+            dados gerados em{' '}
             <time dateTime={dados.gerado_em}>{formatDateTime(dados.gerado_em)}</time>
           </p>
         </div>
@@ -38,59 +43,75 @@ export default async function Page() {
       <main className="mx-auto flex max-w-7xl flex-col gap-14 px-4 py-10 md:px-8">
         {cefet ? (
           <section aria-label="Indicadores principais">
-            <KpiHeader cefet={cefet} sintetico={sintetico} tempoManual={dados.tempo_manual} />
+            <KpiHeader
+              cefet={cefet}
+              sintetico={sintetico}
+              tempoModeloUnico={dados.processo_anterior?.qualidade?.segundos ?? null}
+            />
           </section>
         ) : (
           <p className="text-sm text-muted-foreground">Caso &quot;cefet-engcomp&quot; não encontrado nos dados.</p>
         )}
 
+        {dados.processo_anterior?.qualidade ? (
+          <Section
+            id="anterior"
+            numero={2}
+            titulo="Contra o processo anterior"
+            descricao="Um modelo recebe o PPC inteiro e a especificação do GradMent, sem segunda IA, juíza ou validador. Mesmo PPC e mesmo gabarito."
+          >
+            <PreviousProcess anterior={dados.processo_anterior} pipeline={cefet} />
+          </Section>
+        ) : null}
+
         <Section
           id="acerto"
-          numero={2}
+          numero={3}
           titulo="Acerto por campo"
           descricao="Percentual de acerto de cada campo extraído, comparado ao gabarito determinístico."
         >
-          <FieldAccuracyChart execucoes={dados.execucoes} casos={dados.resumo_por_caso} />
+          <FieldAccuracyChart execucoes={execucoes} casos={casos} />
         </Section>
 
         <Section
           id="juiza"
-          numero={3}
+          numero={4}
           titulo="A juíza ajudou?"
           descricao="Para cada item em que IA 1 e IA 2 divergiram: a decisão da juíza corrigiu, manteve ou piorou o resultado?"
         >
           <div className="flex flex-col gap-4">
             <JudgeDiversityCards grupos={dados.juiza_por_diversidade} />
-            <JudgeCharts execucoes={dados.execucoes} />
+            <JudgeCharts execucoes={execucoes} />
           </div>
         </Section>
 
         <Section
           id="modelos"
-          numero={4}
+          numero={5}
           titulo="Diversidade de modelos"
           descricao="Quais modelos fizeram cada papel. Quando IA 1 e IA 2 usam o mesmo modelo, a extração dupla perde independência."
         >
-          <ModelDiversityTable execucoes={dados.execucoes} />
+          <ModelDiversityTable execucoes={execucoes} />
         </Section>
 
-        <Section id="cobertura" numero={5} titulo="Quanto do PPC chegou às IAs">
+        <Section id="cobertura" numero={6} titulo="Quanto do PPC chegou às IAs">
           <CoverageCard cobertura={dados.cobertura_texto_ppc_real} />
         </Section>
 
         <Section
           id="decisoes"
-          numero={6}
+          numero={7}
           titulo="Decisões da juíza"
           descricao="Cada arbitragem registrada, com a página do PPC citada pela juíza e o valor esperado no gabarito."
         >
-          <JudgeDecisionsTable decisoes={dados.decisoes_juiza} />
+          <JudgeDecisionsTable decisoes={decisoes} />
         </Section>
       </main>
 
       <footer className="border-t bg-background">
         <div className="mx-auto max-w-7xl px-4 py-6 text-sm text-muted-foreground md:px-8">
-          Fonte: execuções reais pontuadas contra gabarito determinístico. Tempo manual ainda não medido.
+          Fonte: execuções reais pontuadas contra gabarito determinístico; custo do Claude contado pela API oficial de
+          contagem de tokens. Tempo de revisão humana ainda não medido.
         </div>
       </footer>
     </div>

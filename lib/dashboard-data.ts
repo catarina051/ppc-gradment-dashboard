@@ -35,6 +35,8 @@ export interface ResumoCaso {
 export interface Execucao {
   id: string
   caso: CasoId
+  /** true quando a execução falhou (ex.: provedor 503); nesse caso só há id, caso, segundos e erro. */
+  falhou?: boolean
   segundos: number
   modelo_ia1: string
   modelo_ia2: string
@@ -102,6 +104,41 @@ export interface JuizaPorDiversidade {
   acerto_pct: number
 }
 
+export interface CustoClaudePorPpc {
+  modelo: string
+  tokens_entrada_pdf_anexado: number
+  tokens_entrada_texto_extraido: number
+  tokens_saida_json_gradment: number
+  custo_usd_pdf_anexado: number
+  custo_usd_texto_extraido: number
+  observacao: string
+}
+
+/** Processo anterior: um modelo recebe o PPC inteiro + especificação, sem dupla, juíza ou validador. */
+export interface ProcessoAnterior {
+  descricao: string
+  qualidade: {
+    execucao: string
+    modelo: string
+    segundos: number
+    obrig_vs_optativa_pct: number
+    carga_horaria_pct: number
+    disciplinas_inexistentes: number
+    requisitos_precisao_pct: number
+    requisitos_revocacao_pct: number
+    aceito_pelo_gradment: boolean
+  } | null
+  custo_claude_por_ppc: CustoClaudePorPpc[] | null
+  custo_pipeline_usd: number
+}
+
+/** Casos que são execuções do pipeline (o baseline do processo anterior fica em seção própria). */
+export const CASOS_PIPELINE: CasoId[] = ['sintetico', 'cefet-engcomp', 'unifei-eco']
+
+export function ehDoPipeline(caso: CasoId): boolean {
+  return CASOS_PIPELINE.includes(caso)
+}
+
 export interface DashboardDados {
   gerado_em: string
   fonte: string
@@ -110,6 +147,8 @@ export interface DashboardDados {
   decisoes_juiza: DecisaoJuiza[]
   /** Pode faltar em respostas antigas em cache. */
   juiza_por_diversidade?: JuizaPorDiversidade[]
+  /** Pode faltar em respostas antigas em cache. */
+  processo_anterior?: ProcessoAnterior
   cobertura_texto_ppc_real: CoberturaTexto
   tempo_manual: TempoManual
   volume_por_ppc_real: {
