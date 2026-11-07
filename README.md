@@ -4,7 +4,13 @@
 
 ## O que o dashboard mostra
 
+![Topo do dashboard: KPIs do PPC real e a comparação com o processo anterior](docs/img/dashboard-topo.png)
+
 O pipeline lê o PPC (Projeto Pedagógico de Curso) de uma universidade e gera a matriz curricular do GradMent com duas IAs que extraem de forma independente, um código que compara e uma terceira IA, a juíza, que arbitra só as divergências. O dashboard exibe o acerto de cada execução contra um gabarito feito sem LLM, a diferença entre a juíza rodar em modelo diferente ou no mesmo, a comparação com o processo anterior (mandar o PDF para um LLM no chat) e o custo em tokens.
+
+![Seção A juíza ajudou?: 92,5% de acerto em modelo diferente e 66,2% no mesmo modelo](docs/img/dashboard-juiza.png)
+
+*Capturas do site publicado em 07/11/2026.*
 
 ## Como eu trabalhei: o loop
 
