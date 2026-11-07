@@ -66,7 +66,7 @@ export function KpiHeader({
           aside={
             <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
               modelo único:{' '}
-              <GrayBadge>{tempoModeloUnico === null ? 'A MEDIR' : formatMinSec(tempoModeloUnico)}</GrayBadge>
+              <GrayBadge>{tempoModeloUnico === null ? 'não medido' : formatMinSec(tempoModeloUnico)}</GrayBadge>
             </span>
           }
           footnote={`min:seg · faixa ${formatMinSec(cefet.tempo_min_s)}–${formatMinSec(cefet.tempo_max_s)}`}
