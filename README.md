@@ -1,6 +1,6 @@
 # PPC → GradMent · dashboard feito com vibe coding
 
-**Dashboard publicado em [gradment.vercel.app](https://gradment.vercel.app) com os resultados medidos do pipeline [`ppc-gradment-ia`](https://github.com/catarina051/ppc-gradment-ia).** Eu o construí no v0 com dois prompts e uma rodada no Claude Code. Este repositório guarda o resultado, os prompts exatos e o registro do que foi decisão minha e do que foi da IA.
+**Dashboard publicado em [gradment.vercel.app](https://gradment.vercel.app) com os resultados medidos do pipeline [`ppc-gradment-ia`](https://github.com/catarina051/ppc-gradment-ia).** Eu o construí no v0 com dois prompts e uma rodada no Claude Code. Este repositório guarda o resultado, os prompts exatos e a divisão do que foi decisão minha e do que foi da IA.
 
 ## O que o dashboard mostra
 
